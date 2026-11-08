@@ -22,7 +22,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "pnpm build && pnpm start -p 3005",
+    command: "npx next build --webpack && npx next start -p 3005",
     url: "http://127.0.0.1:3005",
     reuseExistingServer: !process.env.CI,
     timeout: 120000,

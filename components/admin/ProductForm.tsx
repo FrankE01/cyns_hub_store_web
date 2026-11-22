@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -10,6 +10,8 @@ import {
   Trash2,
   Clock,
   AlertCircle,
+  Upload,
+  Link as LinkIcon,
 } from "lucide-react";
 import { Product, Size, Category } from "../../lib/types";
 import { cmsStore } from "../../lib/store/cmsStore";
@@ -72,6 +74,10 @@ export default function ProductForm({
     ]
   );
   const [newImageUrl, setNewImageUrl] = useState("");
+  const [imageInputMode, setImageInputMode] = useState<"upload" | "url">("upload");
+  const [isDragging, setIsDragging] = useState(false);
+  const [imageError, setImageError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Product Details
   const [fit, setFit] = useState(initialProduct?.details?.fit || "Relaxed, true to size");
@@ -117,6 +123,7 @@ export default function ProductForm({
   };
 
   const addImage = () => {
+    setImageError(null);
     if (newImageUrl.trim()) {
       setImages([...images, newImageUrl.trim()]);
       setNewImageUrl("");
@@ -125,6 +132,47 @@ export default function ProductForm({
 
   const removeImage = (index: number) => {
     setImages(images.filter((_, i) => i !== index));
+  };
+
+  const handleFiles = (files: FileList | File[]) => {
+    setImageError(null);
+    const validFiles: File[] = [];
+    const allowed = ["image/jpeg", "image/png", "image/webp", "image/svg+xml", "image/gif", "image/avif"];
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      if (!allowed.includes(file.type)) {
+        setImageError("Unsupported file type. Please upload JPG, PNG, WebP, SVG, GIF, or AVIF.");
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        setImageError(`"${file.name}" exceeds 5MB limit. Please choose files under 5MB.`);
+        return;
+      }
+      validFiles.push(file);
+    }
+
+    if (validFiles.length === 0) return;
+
+    const readers = validFiles.map((file) => {
+      return new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          if (typeof reader.result === "string") resolve(reader.result);
+          else reject(new Error("Failed to read file"));
+        };
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(file);
+      });
+    });
+
+    Promise.all(readers)
+      .then((dataUrls) => {
+        setImages((prev) => [...prev, ...dataUrls]);
+      })
+      .catch(() => {
+        setImageError("Failed to upload image file(s). Please try again.");
+      });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -543,50 +591,181 @@ export default function ProductForm({
 
           {/* High-Resolution Media Gallery */}
           <div className="bg-white p-6 rounded-xl border border-[#EBE5DC] shadow-xs space-y-4">
-            <h3 className="font-serif text-sm font-semibold text-stone-900 pb-2 border-b border-stone-100">
-              Imagery &amp; Visuals ({images.length})
-            </h3>
+            <div className="flex items-center justify-between pb-2 border-b border-stone-100">
+              <h3 className="font-serif text-sm font-semibold text-stone-900">
+                Imagery &amp; Visuals ({images.length})
+              </h3>
 
-            <div className="space-y-2">
-              {images.map((url, i) => (
-                <div key={i} className="flex items-center space-x-2 p-2 bg-[#FAF8F5] rounded-lg border border-stone-200">
-                  <div className="relative w-12 h-14 bg-stone-100 rounded overflow-hidden shrink-0">
-                    <Image src={url} alt={`Photo ${i + 1}`} fill className="object-cover" sizes="48px" />
-                  </div>
-                  <input
-                    type="url"
-                    value={url}
-                    readOnly
-                    className="flex-1 text-[11px] text-stone-500 truncate bg-transparent outline-none font-mono"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeImage(i)}
-                    className="p-1 text-stone-400 hover:text-red-600"
-                    title="Remove photo"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              ))}
+              {/* Mode Toggle Pills */}
+              <div className="inline-flex rounded-md p-0.5 bg-stone-100 border border-stone-200">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setImageInputMode("upload");
+                    setImageError(null);
+                  }}
+                  className={`inline-flex items-center space-x-1 px-2.5 py-1 text-[11px] font-medium rounded transition-colors ${
+                    imageInputMode === "upload"
+                      ? "bg-white text-stone-900 shadow-2xs font-semibold"
+                      : "text-stone-500 hover:text-stone-800"
+                  }`}
+                >
+                  <Upload className="w-3 h-3" />
+                  <span>Upload Files</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setImageInputMode("url");
+                    setImageError(null);
+                  }}
+                  className={`inline-flex items-center space-x-1 px-2.5 py-1 text-[11px] font-medium rounded transition-colors ${
+                    imageInputMode === "url"
+                      ? "bg-white text-stone-900 shadow-2xs font-semibold"
+                      : "text-stone-500 hover:text-stone-800"
+                  }`}
+                >
+                  <LinkIcon className="w-3 h-3" />
+                  <span>Image Link</span>
+                </button>
+              </div>
             </div>
 
-            <div className="flex items-center space-x-2 pt-2">
-              <input
-                type="url"
-                value={newImageUrl}
-                onChange={(e) => setNewImageUrl(e.target.value)}
-                placeholder="https://images.unsplash..."
-                className="flex-1 px-3 py-2 border border-stone-300 rounded-lg text-xs text-stone-900 bg-stone-50/50"
-              />
-              <button
-                type="button"
-                onClick={addImage}
-                className="px-3 py-2 bg-stone-900 text-white rounded-lg text-xs font-semibold hover:bg-black uppercase tracking-wider shrink-0"
+            {/* Existing images list */}
+            {images.length > 0 && (
+              <div className="space-y-2">
+                {images.map((url, i) => {
+                  const isUploaded = url.startsWith("data:") || url.startsWith("blob:");
+                  return (
+                    <div key={i} className="flex items-center space-x-2 p-2 bg-[#FAF8F5] rounded-lg border border-stone-200">
+                      <div
+                        className="relative w-12 h-14 bg-stone-100 rounded overflow-hidden shrink-0 border border-stone-200/60"
+                        style={{ position: "relative" }}
+                      >
+                        <Image
+                          src={url}
+                          alt={`Photo ${i + 1}`}
+                          fill
+                          className="object-cover"
+                          sizes="48px"
+                          unoptimized={isUploaded}
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        {isUploaded ? (
+                          <div className="flex items-center space-x-1.5">
+                            <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-800 shrink-0">
+                              Uploaded #{i + 1}
+                            </span>
+                            <span className="text-[11px] text-stone-400 truncate">
+                              Device file ready
+                            </span>
+                          </div>
+                        ) : (
+                          <input
+                            type="url"
+                            value={url}
+                            readOnly
+                            className="w-full text-[11px] text-stone-500 truncate bg-transparent outline-none font-mono"
+                          />
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeImage(i)}
+                        className="p-1 text-stone-400 hover:text-red-600 transition-colors"
+                        title="Remove photo"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Mode 1: Upload from device */}
+            {imageInputMode === "upload" && (
+              <div
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setIsDragging(true);
+                }}
+                onDragLeave={(e) => {
+                  e.preventDefault();
+                  setIsDragging(false);
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setIsDragging(false);
+                  if (e.dataTransfer.files?.length) {
+                    handleFiles(e.dataTransfer.files);
+                  }
+                }}
+                onClick={() => fileInputRef.current?.click()}
+                className={`border-2 border-dashed rounded-xl p-5 text-center cursor-pointer transition-all ${
+                  isDragging
+                    ? "border-[#475438] bg-[#475438]/5"
+                    : "border-stone-300 hover:border-stone-400 bg-stone-50/50 hover:bg-stone-50"
+                }`}
               >
-                Add Photo
-              </button>
-            </div>
+                <div className="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center mx-auto text-stone-500 mb-1.5">
+                  <Upload className="w-4 h-4 text-stone-600" />
+                </div>
+                <p className="text-xs font-semibold text-stone-800">
+                  Upload photos from device
+                </p>
+                <p className="text-[11px] text-stone-400 mt-0.5">
+                  Click to browse or drop files (single or multiple, up to 5MB each)
+                </p>
+
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/svg+xml,image/gif,image/avif"
+                  multiple
+                  onChange={(e) => {
+                    if (e.target.files?.length) {
+                      handleFiles(e.target.files);
+                    }
+                    e.target.value = "";
+                  }}
+                  className="sr-only"
+                  aria-label="Upload garment images"
+                />
+              </div>
+            )}
+
+            {/* Mode 2: Link / URL */}
+            {imageInputMode === "url" && (
+              <div className="flex items-center space-x-2 pt-1">
+                <input
+                  type="url"
+                  value={newImageUrl}
+                  onChange={(e) => {
+                    setImageError(null);
+                    setNewImageUrl(e.target.value);
+                  }}
+                  placeholder="https://images.unsplash..."
+                  className="flex-1 px-3 py-2 border border-stone-300 rounded-lg text-xs text-stone-900 bg-stone-50/50 focus:outline-hidden focus:ring-2 focus:ring-[#475438]"
+                />
+                <button
+                  type="button"
+                  onClick={addImage}
+                  className="px-3 py-2 bg-stone-900 text-white rounded-lg text-xs font-semibold hover:bg-black uppercase tracking-wider shrink-0"
+                >
+                  Add Photo
+                </button>
+              </div>
+            )}
+
+            {/* Upload or format error */}
+            {imageError && (
+              <div className="flex items-center space-x-1.5 text-xs text-red-600 bg-red-50 p-2 rounded-lg border border-red-200">
+                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                <span>{imageError}</span>
+              </div>
+            )}
           </div>
         </div>
       </div>

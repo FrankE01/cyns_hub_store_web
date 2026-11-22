@@ -2,7 +2,7 @@ import React from "react";
 import Link from "next/link";
 
 interface LogoProps {
-  variant?: "default" | "hero" | "nav" | "footer";
+  variant?: "default" | "hero" | "nav" | "footer" | "admin";
   className?: string;
   href?: string;
 }
@@ -51,6 +51,15 @@ export default function Logo({
             Cyn&apos;s Hub
           </span>
           <span className="text-[9px] tracking-[0.35em] text-stone-500 uppercase -mt-0.5">
+            Boutique
+          </span>
+        </div>
+      ) : variant === "admin" ? (
+        <div className="flex flex-col items-start">
+          <span className="font-serif text-xl sm:text-2xl tracking-[0.16em] font-medium text-stone-900 group-hover:opacity-85 transition-opacity uppercase leading-none">
+            Cyn&apos;s Hub
+          </span>
+          <span className="text-[9px] tracking-[0.3em] text-stone-500 uppercase mt-0.5">
             Boutique
           </span>
         </div>

@@ -11,6 +11,7 @@ import {
   DollarSign,
 } from "lucide-react";
 import { useCMSStore, cmsStore } from "../../../lib/store/useCMSStore";
+import ImageUploadField from "../../../components/admin/ImageUploadField";
 
 export default function StorefrontCMSPage() {
   const { sections } = useCMSStore();
@@ -244,18 +245,13 @@ export default function StorefrontCMSPage() {
               </div>
             </div>
 
-            <div className="space-y-1.5">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-stone-700">
-                Hero Background Photography URL
-              </label>
-              <input
-                type="url"
-                value={hero.backgroundImage}
-                onChange={(e) => setHero({ ...hero, backgroundImage: e.target.value })}
-                className="w-full px-3.5 py-2.5 border border-stone-300 rounded-lg text-xs text-stone-900 focus:ring-2 focus:ring-[#475438] focus:border-transparent outline-none bg-stone-50/50"
-                placeholder="https://..."
-              />
-            </div>
+            <ImageUploadField
+              label="Hero Background Photography"
+              value={hero.backgroundImage}
+              onChange={(newVal) => setHero({ ...hero, backgroundImage: newVal })}
+              helperText="Upload a high-resolution hero photo from your device or paste an image link."
+              placeholder="https://..."
+            />
           </div>
 
           {/* Hero Visual Preview */}
@@ -270,6 +266,7 @@ export default function StorefrontCMSPage() {
                   alt="Hero Preview"
                   fill
                   className="object-cover"
+                  unoptimized={hero.backgroundImage.startsWith("data:")}
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-xs text-stone-400">
@@ -370,22 +367,23 @@ export default function StorefrontCMSPage() {
                   </div>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-[11px] font-semibold uppercase tracking-wider text-stone-700">
-                    Image URL
-                  </label>
-                  <input
-                    type="url"
-                    value={card.image}
-                    onChange={(e) => handleCuratedChange(idx, "image", e.target.value)}
-                    className="w-full px-3 py-2 border border-stone-300 rounded-md text-xs text-stone-900 bg-white"
-                  />
-                </div>
+                <ImageUploadField
+                  label="Card Visual"
+                  value={card.image}
+                  onChange={(newVal) => handleCuratedChange(idx, "image", newVal)}
+                  placeholder="https://..."
+                />
               </div>
 
               {/* Card Mini Preview */}
               <div className="relative aspect-[16/9] w-full rounded-md overflow-hidden border border-stone-300">
-                <Image src={card.image} alt={card.title} fill className="object-cover" />
+                <Image
+                  src={card.image}
+                  alt={card.title}
+                  fill
+                  className="object-cover"
+                  unoptimized={card.image.startsWith("data:")}
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
                 <div className="absolute bottom-2 left-2 right-2 text-white">
                   <span className="text-[8px] uppercase tracking-widest text-[#D8C7B0] block">

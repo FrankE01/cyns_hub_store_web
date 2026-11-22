@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useCMSStore, cmsStore } from "../../../lib/store/useCMSStore";
 import { Category } from "../../../lib/types";
+import ImageUploadField from "../../../components/admin/ImageUploadField";
 
 export default function AdminCategoriesPage() {
   const { categories, products } = useCMSStore();
@@ -185,17 +186,13 @@ export default function AdminCategoriesPage() {
             />
           </div>
 
-          <div className="space-y-1.5">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-stone-700">
-              Department Cover Image URL
-            </label>
-            <input
-              type="url"
-              value={image}
-              onChange={(e) => setImage(e.target.value)}
-              className="w-full px-3.5 py-2.5 border border-stone-300 rounded-lg text-xs text-stone-900 bg-stone-50/50"
-            />
-          </div>
+          <ImageUploadField
+            label="Department Cover Image"
+            value={image}
+            onChange={setImage}
+            placeholder="https://images.unsplash..."
+            helperText="Upload a photo from your device or paste an image link."
+          />
 
           <div className="flex items-center justify-end space-x-3 pt-3 border-t border-stone-100">
             <button
@@ -257,6 +254,7 @@ export default function AdminCategoriesPage() {
                       fill
                       className="object-cover"
                       sizes="64px"
+                      unoptimized={cat.image?.startsWith("data:")}
                     />
                   </div>
 

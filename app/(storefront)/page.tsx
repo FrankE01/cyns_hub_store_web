@@ -42,6 +42,7 @@ export default function StorefrontHomePage() {
             priority
             className="object-cover object-center lg:object-[center_35%]"
             sizes="100vw"
+            unoptimized={hero.backgroundImage?.startsWith("data:")}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
         </div>
@@ -96,6 +97,7 @@ export default function StorefrontHomePage() {
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-700"
                 sizes="(max-width: 768px) 100vw, 50vw"
+                unoptimized={collection.image?.startsWith("data:")}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
               <div className="absolute bottom-6 left-6 right-6 text-white">

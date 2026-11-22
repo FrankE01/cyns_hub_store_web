@@ -16,13 +16,22 @@ import {
   X,
   Plus,
 } from "lucide-react";
-import { AdminAuthProvider, AdminRouteGuard, useAdminAuth } from "../../lib/store/auth";
+import {
+  AdminAuthProvider,
+  AdminRouteGuard,
+  useAdminAuth,
+} from "../../lib/store/auth";
 import { useCMSStore } from "../../lib/store/useCMSStore";
 import Logo from "../../components/Logo";
 
 const ADMIN_NAV = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
-  { label: "Orders & Dispatch", href: "/admin/orders", icon: ShoppingBag, badge: "orders" },
+  {
+    label: "Orders & Dispatch",
+    href: "/admin/orders",
+    icon: ShoppingBag,
+    badge: "orders",
+  },
   { label: "Products & Stock", href: "/admin/products", icon: Layers },
   { label: "Categories", href: "/admin/categories", icon: FolderTree },
   { label: "Storefront CMS", href: "/admin/cms", icon: Sparkles },
@@ -46,7 +55,7 @@ function AdminShell({ children }: { children: React.ReactNode }) {
       o.fulfillmentStatus === "awaiting_payment" ||
       o.fulfillmentStatus === "processing" ||
       o.fulfillmentStatus === "awaiting_stock" ||
-      o.fulfillmentStatus === "ready_for_dispatch"
+      o.fulfillmentStatus === "ready_for_dispatch",
   ).length;
 
   return (
@@ -61,15 +70,15 @@ function AdminShell({ children }: { children: React.ReactNode }) {
 
       {/* Sidebar Navigation */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-[#EBE5DC] flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:h-screen lg:shrink-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-[#EBE5DC] flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 lg:sticky lg:top-0 lg:h-screen lg:shrink-0 ${
           mobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         {/* Brand Header */}
-        <div className="h-20 px-6 flex items-center justify-between border-b border-[#EBE5DC]">
+        <div className="min-h-20 h-auto py-4 px-6 flex items-center justify-between border-b border-[#EBE5DC] shrink-0">
           <div className="flex flex-col">
-            <Logo variant="nav" />
-            <span className="text-[10px] uppercase font-semibold tracking-[0.2em] text-[#475438] mt-0.5">
+            <Logo variant="admin" href="/admin" />
+            <span className="text-[10px] uppercase font-semibold tracking-[0.2em] text-[#475438] mt-1">
               Control Center
             </span>
           </div>
@@ -84,7 +93,7 @@ function AdminShell({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Quick Action Button */}
-        <div className="p-4 border-b border-[#EBE5DC]">
+        <div className="p-4 border-b border-[#EBE5DC] shrink-0">
           <Link
             href="/admin/products/new"
             onClick={() => setMobileSidebarOpen(false)}
@@ -129,7 +138,7 @@ function AdminShell({ children }: { children: React.ReactNode }) {
         </nav>
 
         {/* Storefront Link & User Profile */}
-        <div className="p-4 border-t border-[#EBE5DC] space-y-3 bg-[#FAF8F5]/50">
+        <div className="p-4 border-t border-[#EBE5DC] space-y-3 bg-[#FAF8F5]/50 shrink-0">
           <Link
             href="/"
             target="_blank"
@@ -181,7 +190,7 @@ function AdminShell({ children }: { children: React.ReactNode }) {
           >
             <Menu className="w-6 h-6" strokeWidth={1.5} />
           </button>
-          <Logo variant="nav" />
+          <Logo variant="admin" href="/admin" />
           <Link
             href="/"
             target="_blank"

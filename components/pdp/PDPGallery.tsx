@@ -35,6 +35,7 @@ export default function PDPGallery({
           priority
           sizes="(max-width: 768px) 100vw, 50vw"
           className="object-cover object-center transition-all duration-300"
+          unoptimized={currentImage?.startsWith("data:")}
         />
 
         {/* Badge in top left */}
@@ -70,6 +71,7 @@ export default function PDPGallery({
                 fill
                 sizes="120px"
                 className="object-cover object-center"
+                unoptimized={img?.startsWith("data:")}
               />
             </button>
           ))}

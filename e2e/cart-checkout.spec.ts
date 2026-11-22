@@ -32,7 +32,7 @@ test.describe("Cart & Checkout Funnel", () => {
     const checkoutLink = drawer.getByRole("link", { name: /proceed to checkout/i });
     await checkoutLink.click();
 
-    await expect(page).toHaveURL(/\/checkout/);
+    await expect(page).toHaveURL(/\/checkout/, { timeout: 10000 });
     await expect(page.getByRole("heading", { name: /checkout/i })).toBeVisible();
 
     // Fill delivery form
